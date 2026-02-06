@@ -11,30 +11,45 @@ const PORT = process.env.PORT || 5000;
 // Initialize Firebase
 initializeFirebase();
 
-// CORS middleware
-app.use((req, res, next) => {
-  const allowedOrigins = ['https://cwi-project-xumz.vercel.app', 'http://localhost:3000'];
-  const origin = req.headers.origin;
-
-  if (origin) {
-    // Force exact match, NO trailing slash
-    if (allowedOrigins.includes(origin.replace(/\/$/, ''))) {
-      res.setHeader('Access-Control-Allow-Origin', origin.replace(/\/$/, ''));
-      res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
-      res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization');
-      res.setHeader('Access-Control-Allow-Credentials', 'true');
+// CORS Configuration - FIXED
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps, Postman, curl)
+    if (!origin) return callback(null, true);
+    
+    // Remove trailing slash from origin if present
+    const normalizedOrigin = origin.replace(/\/$/, '');
+    
+    const allowedOrigins = [
+      'https://cwi-project-xumz.vercel.app',
+      'http://localhost:3000',
+      'http://localhost:5173'
+    ];
+    
+    if (allowedOrigins.includes(normalizedOrigin)) {
+      callback(null, true);
+    } else {
+      console.log('❌ CORS blocked origin:', origin);
+      callback(new Error('Not allowed by CORS'));
     }
-  }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  optionsSuccessStatus: 204
+};
 
-  // Handle preflight
-  if (req.method === 'OPTIONS') return res.sendStatus(204);
+app.use(cors(corsOptions));
 
-  next();
-});
-
-
+// Body parsing middleware
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+// Request logging middleware
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.path} - Origin: ${req.headers.origin || 'none'}`);
+  next();
+});
 
 // MongoDB Connection
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/clinical-waste-intelligence', {
@@ -56,7 +71,8 @@ app.get('/health', (req, res) => {
   res.json({
     status: 'OK',
     timestamp: new Date(),
-    mongodb: mongoose.connection.readyState === 1 ? 'Connected' : 'Disconnected'
+    mongodb: mongoose.connection.readyState === 1 ? 'Connected' : 'Disconnected',
+    cors: 'Enabled'
   });
 });
 
@@ -94,6 +110,7 @@ app.use((req, res) => {
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
   console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`🌐 CORS enabled for: https://cwi-project-xumz.vercel.app`);
 });
 
 module.exports = app;

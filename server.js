@@ -17,24 +17,11 @@ initializeFirebase();
 
 // Simplified CORS - let vercel.json handle headers
 app.use(cors({
-  origin: [
-    'https://cwi-project-xumz.vercel.app',
-    'http://localhost:3000',
-    'http://localhost:5173'
-  ],
+  origin: '*',
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }));
-
-// Explicit OPTIONS handler for ALL routes
-app.options('*', (req, res) => {
-  res.setHeader('Access-Control-Allow-Origin', 'https://cwi-project-xumz.vercel.app');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization,X-Requested-With');
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.sendStatus(204);
-});
 
 // Body parsing middleware
 app.use(bodyParser.json());

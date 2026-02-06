@@ -17,21 +17,26 @@ const allowedOrigins = [
 ];
 
 // CORS middleware
-app.use(cors({
-  origin: function(origin, callback) {
-    if (!origin) return callback(null, true); // allow server-to-server or Postman
+app.use((req, res, next) => {
+  const allowedOrigins = ['https://cwi-project-xumz.vercel.app', 'http://localhost:3000'];
+  const origin = req.headers.origin;
 
-    // Normalize trailing slash
-    const normalizedOrigin = origin.replace(/\/$/, '');
-    if (allowedOrigins.includes(normalizedOrigin)) {
-      return callback(null, true);
+  if (origin) {
+    // Force exact match, NO trailing slash
+    if (allowedOrigins.includes(origin.replace(/\/$/, ''))) {
+      res.setHeader('Access-Control-Allow-Origin', origin.replace(/\/$/, ''));
+      res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization');
+      res.setHeader('Access-Control-Allow-Credentials', 'true');
     }
-    callback(new Error('Not allowed by CORS'));
-  },
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true
-}));
+  }
+
+  // Handle preflight
+  if (req.method === 'OPTIONS') return res.sendStatus(204);
+
+  next();
+});
+
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));

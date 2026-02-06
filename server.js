@@ -12,25 +12,16 @@ const PORT = process.env.PORT || 5000;
 initializeFirebase();
 
 const allowedOrigins = [
-  'https://cwi-project-xumz.vercel.app',
+  'https://cwi-project-xumz.vercel.app'
 ];
-
-app.use((req, res, next) => {
-  if (req.method === 'OPTIONS') {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-    return res.sendStatus(204);
-  }
-  next();
-});
 
 app.use(cors({
   origin: (origin, callback) => {
-    // allow server-to-server and tools like curl/postman
-    if (!origin) return callback(null, true);
+    if (!origin) return callback(null, true); // server-to-server or Postman
 
-    if (allowedOrigins.includes(origin)) {
+    // Normalize origin to remove trailing slash
+    const normalizedOrigin = origin.replace(/\/$/, '');
+    if (allowedOrigins.includes(normalizedOrigin)) {
       return callback(null, true);
     }
 
@@ -41,7 +32,8 @@ app.use(cors({
   credentials: false
 }));
 
-
+// Explicitly handle OPTIONS preflight
+app.options('*', cors());
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));

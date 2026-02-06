@@ -1,0 +1,84 @@
+require('dotenv').config();
+const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
+const bodyParser = require('body-parser');
+const { initializeFirebase } = require('./middleware/auth');
+
+const app = express();
+const PORT = process.env.PORT || 5000;
+
+// Initialize Firebase
+initializeFirebase();
+
+// Middleware
+app.use(cors({
+  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  credentials: true
+}));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
+// // MongoDB Connection
+// mongoose.connect(process.env.MONGODB_URI || 'mongodb+srv://jinu240101:jainesh1234@clinical.arqg5ks.mongodb.net/', {
+//   useNewUrlParser: true,
+//   useUnifiedTopology: true,
+// })
+// .then(() => console.log('✅ MongoDB connected successfully'))
+// .catch((err) => {
+//   console.error('❌ MongoDB connection error:', err);
+//   process.exit(1);
+// });
+mongoose.connect(process.env.MONGODB_URI)
+  .then(() => console.log("🔥 MongoDB Atlas Connected (NO SRV)"))
+  .catch(err => console.error("❌ Mongo Error:", err));
+// Routes
+app.use('/api/waste', require('./routes/waste'));
+app.use('/api/baselines', require('./routes/baselines'));
+
+// Health check
+app.get('/health', (req, res) => {
+  res.json({
+    status: 'OK',
+    timestamp: new Date(),
+    mongodb: mongoose.connection.readyState === 1 ? 'Connected' : 'Disconnected'
+  });
+});
+
+// Root route
+app.get('/', (req, res) => {
+  res.json({
+    message: 'Clinical Waste Intelligence API',
+    version: '1.0.0',
+    endpoints: {
+      health: '/health',
+      waste: '/api/waste',
+      baselines: '/api/baselines'
+    }
+  });
+});
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error('Server Error:', err);
+  res.status(err.status || 500).json({
+    success: false,
+    error: err.message || 'Internal server error'
+  });
+});
+
+// 404 handler
+app.use((req, res) => {
+  res.status(404).json({
+    success: false,
+    error: 'Route not found'
+  });
+});
+
+// Start server
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on http://localhost:${PORT}`);
+  console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
+});
+
+module.exports = app;

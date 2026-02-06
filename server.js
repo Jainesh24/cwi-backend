@@ -11,14 +11,9 @@ const PORT = process.env.PORT || 5000;
 // Initialize Firebase
 initializeFirebase();
 
-const allowedOrigins = [
-  'https://cwi-project-xumz.vercel.app/',
-  'http://localhost:3000'
-];
-
 // CORS middleware
 app.use((req, res, next) => {
-  const allowedOrigins = ['https://cwi-project-xumz.vercel.app/', 'http://localhost:3000'];
+  const allowedOrigins = ['https://cwi-project-xumz.vercel.app', 'http://localhost:3000'];
   const origin = req.headers.origin;
 
   if (origin) {

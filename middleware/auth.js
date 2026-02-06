@@ -20,6 +20,11 @@ const initializeFirebase = () => {
 
 // Middleware to verify Firebase token
 const verifyToken = async (req, res, next) => {
+  // ✅ Allow CORS preflight requests through
+  if (req.method === 'OPTIONS') {
+    return next();
+  }
+  
   try {
     const token = req.headers.authorization?.split('Bearer ')[1];
     

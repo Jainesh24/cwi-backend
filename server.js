@@ -19,19 +19,17 @@ app.use(cors({
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// // MongoDB Connection
-// mongoose.connect(process.env.MONGODB_URI || 'mongodb+srv://jinu240101:jainesh1234@clinical.arqg5ks.mongodb.net/', {
-//   useNewUrlParser: true,
-//   useUnifiedTopology: true,
-// })
-// .then(() => console.log('✅ MongoDB connected successfully'))
-// .catch((err) => {
-//   console.error('❌ MongoDB connection error:', err);
-//   process.exit(1);
-// });
-mongoose.connect(process.env.MONGODB_URI)
-  .then(() => console.log("🔥 MongoDB Atlas Connected (NO SRV)"))
-  .catch(err => console.error("❌ Mongo Error:", err));
+// MongoDB Connection
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/clinical-waste-intelligence', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+})
+.then(() => console.log('✅ MongoDB connected successfully'))
+.catch((err) => {
+  console.error('❌ MongoDB connection error:', err);
+  process.exit(1);
+});
+
 // Routes
 app.use('/api/waste', require('./routes/waste'));
 app.use('/api/baselines', require('./routes/baselines'));

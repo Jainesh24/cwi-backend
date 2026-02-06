@@ -17,7 +17,9 @@ initializeFirebase();
 
 // Simplified CORS - let vercel.json handle headers
 app.use(cors({
-  origin: '*',
+  origin: [
+    'https://cwi-project-xumz.vercel.app',
+  ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']

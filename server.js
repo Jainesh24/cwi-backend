@@ -11,15 +11,28 @@ const PORT = process.env.PORT || 5000;
 // Initialize Firebase
 initializeFirebase();
 
-// Middleware
+const allowedOrigins = [
+  'https://cwi-project-xumz.vercel.app',
+];
+
 app.use(cors({
-  origin: '*',
+  origin: (origin, callback) => {
+    // allow server-to-server and tools like curl/postman
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    return callback(new Error('Not allowed by CORS'));
+  },
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: false
 }));
 
-// Explicitly handle preflight
-app.options('*', cors());
+
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 

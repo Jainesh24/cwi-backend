@@ -15,6 +15,16 @@ const allowedOrigins = [
   'https://cwi-project-xumz.vercel.app',
 ];
 
+app.use((req, res, next) => {
+  if (req.method === 'OPTIONS') {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    return res.sendStatus(204);
+  }
+  next();
+});
+
 app.use(cors({
   origin: (origin, callback) => {
     // allow server-to-server and tools like curl/postman
